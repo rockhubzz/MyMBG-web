@@ -1,6 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #15803d;   /* green-700 */
+  --font-sans: 'Inter', sans-serif;
+}
 
 :root {
   --foreground-rgb: 0, 0, 0;
