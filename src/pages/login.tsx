@@ -192,19 +192,6 @@ export default function LoginPage() {
 
               {/* Submit */}
               <button
-                type="button"
-                onClick={() => router.push('/register')}
-                className="
-                  w-full py-2.5 px-4 rounded-lg font-medium text-sm
-                  border border-green-600 text-green-700
-                  hover:bg-green-50 active:bg-green-100
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600
-                  transition-colors
-                "
-              >
-                Buat Akun Baru
-              </button>
-              <button
                 type="submit"
                 disabled={isSubmitting}
                 className="
@@ -227,10 +214,23 @@ export default function LoginPage() {
                   'Masuk'
                 )}
               </button>
+                            <button
+                type="button"
+                onClick={() => router.push('/register')}
+                className="
+                  w-full py-2.5 px-4 rounded-lg font-medium text-sm
+                  border border-green-600 text-green-700
+                  hover:bg-green-50 active:bg-green-100
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600
+                  transition-colors
+                "
+              >
+                Buat Akun Baru
+              </button>
             </form>
 
             {/* Demo accounts */}
-            <div className="mt-6 pt-5 border-t border-gray-100">
+            {/* <div className="mt-6 pt-5 border-t border-gray-100">
               <p className="text-xs text-gray-400 text-center mb-3">Akun demo</p>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -251,7 +251,7 @@ export default function LoginPage() {
                 Password semua akun:{' '}
                 <code className="font-mono bg-gray-100 px-1 rounded">Password123!</code>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 

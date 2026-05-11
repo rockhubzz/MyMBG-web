@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Route yang butuh login
-const PROTECTED = ['/dashboard', '/bahan-baku', '/resep', '/produksi', '/distribusi'];
+const PROTECTED = ['/dashboard', '/users', '/bahan-baku', '/resep', '/produksi', '/distribusi'];
 // Route yang hanya boleh diakses saat belum login
 const AUTH_ONLY = ['/login', '/register'];
 
@@ -35,6 +35,7 @@ export const config = {
   // Jalankan middleware hanya pada path yang relevan
   matcher: [
     '/dashboard/:path*',
+    '/users/:path*',
     '/bahan-baku/:path*',
     '/resep/:path*',
     '/produksi/:path*',
