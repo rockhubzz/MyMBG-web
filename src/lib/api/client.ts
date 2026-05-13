@@ -1,9 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5292/api';
-
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function apiClient<T>(path: string, options: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE_URL}${path}`, {
+    res = await fetch(`/api${path}`, {
       headers: { 'Content-Type': 'application/json' },
       ...options,
     });
