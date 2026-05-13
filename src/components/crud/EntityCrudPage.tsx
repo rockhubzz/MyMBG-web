@@ -118,7 +118,9 @@ export default function EntityCrudPage({ entity, title, displayColumns, columnAl
   const columnsToDisplay = useMemo(() => {
     if (!meta) return [];
     if (displayColumns) {
-      return meta.columns.filter(c => displayColumns.includes(c.name));
+      // Sort columns to match the order in displayColumns
+      const filtered = meta.columns.filter(c => displayColumns.includes(c.name));
+      return filtered.sort((a, b) => displayColumns.indexOf(a.name) - displayColumns.indexOf(b.name));
     }
     // Default: exclude created_at and updated_at
     return meta.columns.filter(c => {
@@ -258,17 +260,17 @@ export default function EntityCrudPage({ entity, title, displayColumns, columnAl
         </form>
 
         {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-200">
+          <div className="overflow-x-auto max-w-full">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
                 <tr>
                   {columnsToDisplay.map((c) => (
-                    <th key={c.name} className="px-6 py-3 text-left font-semibold text-gray-700">
+                    <th key={c.name} className="px-6 py-3 text-left font-semibold text-gray-700 whitespace-nowrap min-w-max">
                       {columnAliases[c.name] || c.name}
                     </th>
                   ))}
-                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Aksi</th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700 whitespace-nowrap min-w-max">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -295,7 +297,7 @@ export default function EntityCrudPage({ entity, title, displayColumns, columnAl
                   rows.map((row, idx) => (
                     <tr key={`${idx}-${String(row[meta?.primaryKey ?? 'id'] ?? '')}`} className="hover:bg-gray-50">
                       {columnsToDisplay.map((c) => (
-                        <td key={c.name} className="px-6 py-4 text-gray-700">
+                        <td key={c.name} className="px-6 py-4 text-gray-700 whitespace-nowrap min-w-max">
                           <div className="truncate max-w-xs">{formatCellValue(row, c)}</div>
                         </td>
                       ))}

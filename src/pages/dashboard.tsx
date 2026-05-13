@@ -5,6 +5,12 @@ import { useAuthStore } from '@/store/auth-store';
 import { crudApi } from '@/lib/api/crud';
 import { StatCard } from '@/components/StatCard';
 import { Layout } from '@/components/Layout';
+import { FaBoxesPacking } from 'react-icons/fa6';
+import { GiKnifeFork } from 'react-icons/gi';
+import { GiCookingPot } from 'react-icons/gi';
+import { CiDeliveryTruck } from 'react-icons/ci';
+import { TbTruckDelivery } from 'react-icons/tb';
+import { FaUserCircle } from 'react-icons/fa';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -17,7 +23,9 @@ export default function DashboardPage() {
     resep: 0,
     produksi: 0,
     distribusi: 0,
+    produksiBerlangsung: 0,
   });
+  const [latestMenus, setLatestMenus] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,13 +38,19 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [users, bahanBaku, resep, produksi, distribusi] = await Promise.all([
+        const [users, bahanBaku, resep, produksi, distribusi, latestResep] = await Promise.all([
           crudApi.list('users', 1, 1),
           crudApi.list('bahan-baku', 1, 1),
           crudApi.list('resep', 1, 1),
-          crudApi.list('produksi', 1, 1),
+          crudApi.list('produksi', 1, 50),
           crudApi.list('distribusi', 1, 1),
+          crudApi.list('resep', 1, 3),
         ]);
+
+        const produksiItems = produksi.items as Record<string, unknown>[];
+        const produksiBerlangsung = produksiItems.filter(
+          (row) => String(row.status ?? '') === 'Berlangsung'
+        ).length;
 
         setStats({
           users: users.total ?? 0,
@@ -44,7 +58,9 @@ export default function DashboardPage() {
           resep: resep.total ?? 0,
           produksi: produksi.total ?? 0,
           distribusi: distribusi.total ?? 0,
+          produksiBerlangsung,
         });
+        setLatestMenus(latestResep.items ?? []);
       } catch (err) {
         console.error('Failed to load stats:', err);
       } finally {
@@ -91,42 +107,105 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <StatCard
-              icon={<span className="text-2xl">👤</span>}
-              label="Total Users"
-              value={stats.users}
+              icon={<span className="text-3xl text-blue-500"><FaUserCircle /></span>}
+              label="Total User"
+              value={stats.users + ' orang'}
               bgColor="bg-blue-50"
               iconBg="bg-blue-100"
             />
             <StatCard
-              icon={<span className="text-2xl">🥕</span>}
+              icon={<span className="text-3xl text-orange-500"><FaBoxesPacking /></span>}
               label="Bahan Baku"
-              value={stats.bahanBaku}
+              value={stats.bahanBaku + ' item'}
               bgColor="bg-orange-50"
               iconBg="bg-orange-100"
             />
             <StatCard
-              icon={<span className="text-2xl">📋</span>}
+              icon={<span className="text-3xl text-purple-500"><GiKnifeFork /></span>}
               label="Resep"
-              value={stats.resep}
+              value={stats.resep + ' resep'}
               bgColor="bg-purple-50"
               iconBg="bg-purple-100"
             />
             <StatCard
-              icon={<span className="text-2xl">🍳</span>}
+              icon={<span className="text-3xl text-yellow-500"><GiCookingPot /></span>}
               label="Produksi"
-              value={stats.produksi}
+              value={stats.produksi + ' sesi'}
               bgColor="bg-yellow-50"
               iconBg="bg-yellow-100"
             />
             <StatCard
-              icon={<span className="text-2xl">🚚</span>}
+              icon={<span className="text-3xl text-green-500"><TbTruckDelivery /></span>}
               label="Distribusi"
-              value={stats.distribusi}
+              value={stats.distribusi + ' distribusi'}
               bgColor="bg-green-50"
               iconBg="bg-green-100"
             />
           </div>
         )}
+      </div>
+
+      {/* Produksi Berlangsung & Menu Terbaru */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl shadow p-6 border border-yellow-100">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-semibold uppercase text-yellow-600 tracking-wide">
+                  Produksi Berlangsung
+                </p>
+                <p className="text-sm text-gray-600">
+                  Sesi produksi yang masih aktif hari ini dan ke depan.
+                </p>
+              </div>
+              <span className="text-2xl">🍳</span>
+            </div>
+            <p className="text-4xl font-bold text-gray-900 mb-1">{stats.produksiBerlangsung}</p>
+            <p className="text-xs text-gray-500">
+              Status <span className="font-semibold">Berlangsung</span> pada tabel produksi.
+            </p>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl shadow p-6 border border-purple-100">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-semibold uppercase text-purple-600 tracking-wide">
+                  Menu Terbaru
+                </p>
+                <p className="text-sm text-gray-600">
+                  Tiga resep yang terakhir ditambahkan ke sistem.
+                </p>
+              </div>
+              <span className="text-2xl">📋</span>
+            </div>
+
+            {latestMenus.length === 0 ? (
+              <p className="text-sm text-gray-500">Belum ada resep yang terdaftar.</p>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {latestMenus.map((row: any, idx) => (
+                  <li key={String((row.id as string) ?? idx)} className="py-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {String(row.nama_menu ?? row.nama ?? 'Tanpa nama')}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {row.jumlah_porsi ? `Acuan ${row.jumlah_porsi} porsi` : 'Jumlah porsi belum diatur'}
+                      </p>
+                    </div>
+                    {row.estimasi_waktu_menit && (
+                      <span className="text-xs inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                        ⏱ {String(row.estimasi_waktu_menit)} menit
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
     </Layout>
   );

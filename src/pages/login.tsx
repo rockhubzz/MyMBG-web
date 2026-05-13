@@ -39,6 +39,7 @@ export default function LoginPage() {
       const res = await authApi.login(data.email, data.password);
       setAuth(res.token, res.user);
       Cookies.set('mbg-token', res.token, { expires: 1, sameSite: 'strict' });
+      Cookies.set('mbg-role', res.user.role, { expires: 1, sameSite: 'strict' });
       router.push('/dashboard');
     } catch (err: unknown) {
       const msg =

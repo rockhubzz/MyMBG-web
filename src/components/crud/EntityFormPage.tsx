@@ -81,6 +81,7 @@ function getFieldHint(fieldName: string, dataType: string, isNullable: boolean):
     // Distribusi
     tujuan: 'Masukkan tujuan distribusi',
     tanggal_distribusi: 'Masukkan tanggal distribusi',
+    waktu_distribusi: 'Masukkan berapa menit dari sekarang distribusi akan dilakukan',
   };
   
   const hint = hints[fieldName];
@@ -102,6 +103,10 @@ function getFieldHint(fieldName: string, dataType: string, isNullable: boolean):
   
   return `Masukkan nilai${isNullable ? ' (opsional)' : ''}`;
 }
+//   }
+  
+//   return `Masukkan nilai${isNullable ? ' (opsional)' : ''}`;
+// }
 
 function isEditable(col: ColumnDefinition): boolean {
   const lower = col.name.toLowerCase();
@@ -133,6 +138,7 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [resepOptions, setResepOptions] = useState<{ id: string; namaMenu: string }[]>([]);
+  const [produksiOptions, setProduksiOptions] = useState<{ id: string; label: string }[]>([]);
   const [kurangiStokSekarang, setKurangiStokSekarang] = useState(true);
 
   const editableColumns = useMemo(
@@ -159,8 +165,31 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
           } catch {
             setResepOptions([]);
           }
+        } else if (entity === 'distribusi') {
+          try {
+            const [produksiRes, resepRes] = await Promise.all([
+              crudApi.list('produksi', 1, 500, ''),
+              crudApi.list('resep', 1, 500, ''),
+            ]);
+            const resepMap = new Map<string, string>();
+            (resepRes.items as Record<string, unknown>[]).forEach((r) => {
+              resepMap.set(String(r.id), String(r.nama_menu ?? r.id));
+            });
+            const options = (produksiRes.items as Record<string, unknown>[]).map((p) => {
+              const resepId = String(p.resep_id ?? '');
+              const menu = resepMap.get(resepId) ?? 'Resep tidak diketahui';
+              const tanggal = p.tanggal_produksi ? String(p.tanggal_produksi) : '';
+              const status = p.status ? ` [${p.status}]` : '';
+              const label = tanggal ? `${menu} — ${tanggal}${status}` : `${menu}${status}`;
+              return { id: String(p.id), label };
+            });
+            setProduksiOptions(options);
+          } catch {
+            setProduksiOptions([]);
+          }
         } else {
           setResepOptions([]);
+          setProduksiOptions([]);
         }
 
         if (isEditing && id) {
@@ -222,6 +251,16 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
       // Add is_active default only if it exists and we're creating
       if (!isEditing && hasIsActive) {
         payload.is_active = true;
+      }
+
+      // Handle waktu_distribusi conversion from minutes to datetime for distribusi
+      if (entity === 'distribusi' && payload.waktu_distribusi) {
+        const minutes = parseInt(String(payload.waktu_distribusi), 10);
+        if (!isNaN(minutes) && minutes >= 0) {
+          const now = new Date();
+          const futureTime = new Date(now.getTime() + minutes * 60000);
+          payload.waktu_distribusi = futureTime.toISOString();
+        }
       }
 
       // Add created_by on creation only if it exists
@@ -325,7 +364,9 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {entity === 'produksi' && col.name === 'resep_id'
                     ? 'Menu / Resep'
-                    : humanizeLabel(col.name)}
+                    : entity === 'distribusi' && col.name === 'sesi_produksi_id'
+                      ? 'Sesi Produksi'
+                      : humanizeLabel(col.name)}
                   {!col.isNullable && <span className="text-red-500">*</span>}
                 </label>
                 {entity === 'users' && col.name === 'role' ? (
@@ -365,6 +406,19 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
                       </option>
                     ))}
                   </select>
+                ) : entity === 'distribusi' && col.name === 'sesi_produksi_id' ? (
+                  <select
+                    value={form[col.name] ?? ''}
+                    onChange={(e) => setForm((s) => ({ ...s, [col.name]: e.target.value }))}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-black text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="">Pilih sesi produksi</option>
+                    {produksiOptions.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
                 ) : entity === 'bahan-baku' && col.name === 'kategori' ? (
                   <select
                     value={form[col.name] ?? ''}
@@ -378,6 +432,18 @@ export default function EntityFormPage({ entity, title, isEditing = false, id }:
                       </option>
                     ))}
                   </select>
+                ) : entity === 'distribusi' && col.name === 'waktu_distribusi' ? (
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      min="0"
+                      value={form[col.name] ?? ''}
+                      onChange={(e) => setForm((s) => ({ ...s, [col.name]: e.target.value }))}
+                      placeholder="Masukkan jumlah menit"
+                      className="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-white text-black text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <span className="ml-3 text-sm text-gray-400">menit</span>
+                  </div>
                 ) : col.dataType.toLowerCase() === 'date' ? (
                   <input
                     type="date"

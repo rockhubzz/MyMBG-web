@@ -5,12 +5,12 @@ export default function BahanBakuPage() {
     <EntityCrudPage 
       entity="bahan-baku" 
       title="Manajemen Bahan Baku"
-      displayColumns={['nama_bahan', 'satuan', 'stok_saat_ini', 'stok_minimum', 'harga_satuan']}
+      displayColumns={['nama_bahan', 'stok_saat_ini', 'stok_minimum', 'satuan', 'harga_satuan']}
       columnAliases={{
         nama_bahan: 'Nama Bahan',
-        satuan: 'Satuan',
         stok_saat_ini: 'Stok Saat Ini',
         stok_minimum: 'Stok Minimum',
+        satuan: 'Satuan',
         harga_satuan: 'Harga Satuan',
       }}
     />
