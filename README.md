@@ -1,38 +1,152 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# MyMBG Web Dashboard
 
-## Getting Started
+## 📋 Deskripsi Proyek
 
-First, run the development server:
+Aplikasi web dashboard untuk manajemen dapur MBG - menyediakan interface yang user-friendly untuk tracking produksi, distribusi barang, manajemen resep, pencatatan keuangan, dan monitoring performa dapur. Dibangun dengan Next.js untuk performa optimal dan SEO.
+
+## 🚀 Quick Start
+
+### Prasyarat
+
+- Node.js 18.0 atau lebih baru
+- npm atau yarn
+- Git
+- Backend API harus running (lihat backend README)
+
+### Setup Lokal
+
+1. **Clone repository**
+
+```bash
+git clone https://github.com/rockhubzz/MyMBG-web
+cd mymbg-web
+```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Konfigurasi environment**
+
+Buat file `.env.local` di root directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5292
+```
+
+4. **Jalankan development server**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Aplikasi akan running di `http://localhost:3000`
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+5. **Build untuk production**
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```bash
+npm run build
+npm run start
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## 📦 Teknologi Utama
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+| Teknologi   | Versi  | Fungsi                |
+| ----------- | ------ | --------------------- |
+| Next.js     | 16.2+  | React framework & SSR |
+| React       | 19+    | UI library            |
+| TypeScript  | Latest | Type safety           |
+| Zustand     | Latest | State management      |
+| TailwindCSS | Latest | Styling               |
+| Vercel      | -      | Deployment platform   |
 
-## Learn More
+## 🏗️ Arsitektur & Pola Desain
 
-To learn more about Next.js, take a look at the following resources:
+### Struktur Project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── pages/               # Next.js pages
+│   ├── api/            # API routes
+│   ├── login.tsx
+│   ├── dashboard.tsx
+│   ├── produksi.tsx
+│   ├── distribusi.tsx
+│   ├── keuangan.tsx
+│   └── resep.tsx
+├── components/         # Reusable components
+├── lib/
+│   └── api/            # API client layer
+│       ├── client.ts   # Base API client dengan Bearer token
+│       ├── auth.ts
+│       ├── crud.ts
+│       └── produksi.ts
+├── store/              # Zustand state management
+│   └── auth-store.ts
+├── types/              # Type definitions
+└── styles/            # Global styles
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Pola Desain
 
-## Deploy on Vercel
+1. **Client-Side State Management**: Zustand untuk auth state
+2. **API Client Abstraction**: Centralized API client dengan automatic Bearer token injection
+3. **Pages Router**: Traditional page-based routing
+4. **Middleware Authentication**: Protected routes dengan redirect
+5. **Component Composition**: Reusable components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Fitur Utama
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **Dashboard**: Overview metrics dapur
+- **Manajemen Produksi**: Create/edit sesi produksi dengan resep scaling
+- **Manajemen Distribusi**: Track pengiriman produk
+- **Pencatatan Keuangan**: Input transaksi
+- **Master Data**: CRUD resep, bahan baku
+- **User Management**: Admin user management
+
+## 🌐 Deployment
+
+### Production URL
+
+```
+https://my-mbg.vercel.app
+```
+
+### Deploy ke Vercel
+
+```bash
+vercel --prod
+```
+
+### Environment Variables untuk Production
+
+```env
+NEXT_PUBLIC_API_URL=https://api.mymbg.vercel.app
+```
+
+## 🔐 Authentication
+
+- **Bearer Token**: Automatic di semua API requests
+- **Token Storage**: localStorage via Zustand (persisted)
+- **Protected Routes**: Middleware mengecek token
+- **Role-Based Access**: Admin, KepalaDapur, Staff
+
+## 🐛 Troubleshooting
+
+### 401 Unauthorized
+
+- Pastikan login berhasil
+- Cek localStorage untuk `mbg-auth` key
+- Refresh page
+
+### API Connection Error
+
+- Verifikasi `NEXT_PUBLIC_API_URL` di `.env.local`
+- Pastikan backend running
+
+### Build gagal
+
+- Clear `.next`: `rm -rf .next`
+- Reinstall: `rm -rf node_modules && npm install`
